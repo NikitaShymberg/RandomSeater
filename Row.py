@@ -4,7 +4,10 @@ This file contains the Row class
 from Family import Family
 
 
-class RowFullException():
+class RowFullException(Exception):
+    """
+    Indicates that a row doesn't have enough empty seats.
+    """
     pass
 
 
@@ -24,9 +27,10 @@ class Row():
         Asssigns a family into the row. Doesn't yet allocate seats.
         """
         if self.free_spots < fam.size:
-            raise RowFullException(f'Error: attempted to sit family {fam.name}\
-                with {fam.size} people into a row with {self.free_spots} free\
-                spots')
+            raise RowFullException(f'Error: attempted to sit family {fam.name}'
+                                   ' with {fam.size} people into a row with '
+                                   '{self.free_spots} free spots'
+                                   )
 
         self.fams.append(fam)
         self.free_spots -= fam.size
