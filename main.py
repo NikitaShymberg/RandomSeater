@@ -6,7 +6,7 @@ from utils import read_csv
 from Hall import Hall, HallFullException
 
 
-def sit_families(families: [Family], hall: Hall):
+def sit_families(families: [Family], hall: Hall) -> bool:
     """
     Attempts to seat all families in the given `hall`.
     Returns true is successful, raises HallFullException otherwise.
@@ -33,3 +33,5 @@ if __name__ == "__main__":
         except HallFullException as e:
             print(e)
             hall.reset()
+
+    hall.to_csv('output.csv')

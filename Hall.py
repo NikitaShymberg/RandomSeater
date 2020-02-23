@@ -2,6 +2,7 @@
 This file contains the hall class
 """
 from copy import deepcopy
+import csv
 import datetime
 import numpy as np
 import random
@@ -75,6 +76,25 @@ class Hall():
         for row in self.rows:
             string += str(row) + '\n'
         return string
+
+    def to_csv(self, csv_path) -> None:
+        """
+        Creates a csv file at the path specified by `csv_path`
+        with the following columns:
+        - Family name
+        - Seats (each seat in a new column)
+        """
+        families = []
+        for row in self.rows:
+            row.assign_seats()
+            families += row.families
+        families.sort(key=lambda f: f.name)
+
+        with open(csv_path, mode='w') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Family Name', 'Seats'])
+            for fam in families:
+                writer.writerow([fam.name, *fam.seats])
 
 
 if __name__ == "__main__":

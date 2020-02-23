@@ -1,6 +1,7 @@
 """
 This file contains the Row class
 """
+import random
 from Family import Family
 
 
@@ -19,7 +20,7 @@ class Row():
     def __init__(self, name: str, max_length: int):
         self.name = name
         self.max_length = max_length
-        self.fams = []
+        self.families = []
         self.free_spots = max_length
 
     def sit(self, fam: Family) -> None:
@@ -32,15 +33,26 @@ class Row():
                                    f'{self.free_spots} free spots'
                                    )
 
-        self.fams.append(fam)
+        self.families.append(fam)
         self.free_spots -= fam.size
-        fam.row = self
 
-    def assign_seats(self):
+    def _create_seat_number(self, seat_number: int) -> str:
         """
-        Assigns seat numbers to all the families in this row.
+        Returns a string in the format 'self.name seat_number' (no space).
         """
-        ...  # TODO: write
+        return f'{self.name}{seat_number}'
+
+    def assign_seats(self) -> None:
+        """
+        Assigns random adjacent seat numbers to all the families in this row.
+        """
+        random.shuffle(self.families)
+        seats = [self._create_seat_number(i) for i in range(self.max_length)]
+        seat_num = 0
+        for fam in self.families:
+            cur_seats = seats[seat_num:seat_num + fam.size]
+            fam.assign_seats(cur_seats)
+            seat_num += fam.size
 
     def __repr__(self):
         string = f'Row: {self.name}, '
