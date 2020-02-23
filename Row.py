@@ -34,6 +34,7 @@ class Row():
 
         self.fams.append(fam)
         self.free_spots -= fam.size
+        fam.row = self
 
     def assign_seats(self):
         """
@@ -41,7 +42,7 @@ class Row():
         """
         ...  # TODO: write
 
-    def __str__(self):
+    def __repr__(self):
         string = f'Row: {self.name}, '
         string += f'Max: {self.max_length}, '
         string += f'Remaining: {self.free_spots}'

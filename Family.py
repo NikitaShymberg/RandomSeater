@@ -12,3 +12,7 @@ class Family():
         self.name = name
         self.size = num_members
         self.row = None
+
+    def __repr__(self):
+        string = f'Family {self.name} - size {self.size} - seat {self.row}'
+        return string

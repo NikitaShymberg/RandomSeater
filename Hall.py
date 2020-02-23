@@ -1,7 +1,8 @@
 """
 This file contains the hall class
 """
-import csv
+from copy import deepcopy
+import datetime
 import numpy as np
 import random
 from Family import Family
@@ -24,8 +25,13 @@ class Hall():
     def __init__(self, layout_csv_path: str):
         self.rows = []
         self.rows = read_csv(layout_csv_path, Row)
-        self.max_row_idx = np.argmax([r.max_length for r in self.rows])
-        self.max_row_size = self.rows[self.max_row_idx].max_length
+        self.empty_rows = deepcopy(self.rows)  # Used to reset the hall
+        self._update_max_row_info()
+        random.seed(datetime.datetime.now())
+
+    def _update_max_row_info(self):
+        self.max_row_idx = self.find_max_row_idx()
+        self.max_row_size = self.rows[self.max_row_idx].free_spots
 
     def sit(self, fam: Family, debug=True) -> None:
         """
@@ -45,16 +51,26 @@ class Hall():
 
         # Update max_row_size
         if row_idx == self.max_row_idx:
-            self.max_row_idx = self.find_max_row_idx()
-            self.max_row_size = self.rows[self.max_row_idx].free_spots
+            self._update_max_row_info()
 
         if debug:
+            print('Family sat in row:', self.rows[row_idx].name)
             print(self)
 
     def find_max_row_idx(self) -> int:
+        """
+        Returns the index of the row with the most empty seats.
+        """
         return np.argmax([r.free_spots for r in self.rows])
 
-    def __str__(self):
+    def reset(self):
+        """
+        Removes all families from all rows.
+        """
+        self.rows = deepcopy(self.empty_rows)
+        self._update_max_row_info()
+
+    def __repr__(self):
         string = ''
         for row in self.rows:
             string += str(row) + '\n'
