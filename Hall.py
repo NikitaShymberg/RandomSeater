@@ -3,8 +3,10 @@ This file contains the hall class
 """
 import csv
 import numpy as np
+import random
 from Family import Family
 from Row import Row
+from utils import read_csv
 
 
 class HallFullException(Exception):
@@ -15,62 +17,59 @@ class HallFullException(Exception):
     pass
 
 
-class CSVParseException(Exception):
-    """
-    Indicates that the provided csv file structure is incorrect.
-    """
-    pass
-
-
 class Hall():
     """
     The Hall class. TODO: doc
     """
     def __init__(self, layout_csv_path: str):
         self.rows = []
-        self._setup_rows(layout_csv_path)
+        self.rows = read_csv(layout_csv_path, Row)
         self.max_row_idx = np.argmax([r.max_length for r in self.rows])
         self.max_row_size = self.rows[self.max_row_idx].max_length
 
-    def _setup_rows(self, layout_csv_path):
-        """
-        Reads the row layout from the given `layout_csv_path` and
-        arranges the rows in self accordingly.
-        """
-        with open(layout_csv_path) as f:
-            reader = csv.DictReader(f)
-            headers = reader.fieldnames
-            if len(headers) != 2:
-                raise CSVParseException(
-                    f'Too many columns in {layout_csv_path}, '
-                    'expected 2, found {len(headers)}'
-                )
-
-            row_name = headers[0]
-            row_size = headers[1]
-            for csv_row in reader:
-                try:
-                    row = Row(csv_row[row_name], int(csv_row[row_size]))
-                except ValueError:
-                    raise CSVParseException(
-                        f'Invalid row format in {layout_csv_path} '
-                        'found row {csv_row}'
-                    )
-                self.rows.append(row)
-
-    def sit(self, fam: Family):
+    def sit(self, fam: Family, debug=True) -> None:
         """
         Sits the given `fam` in a random available row.
         """
         if fam.size > self.max_row_size:
             raise HallFullException(
                 f'Error: the hall is full! '
-                'Max empty row size: {self.max_row_size} '
-                'Current family size: {fam.size}'
+                f'Max empty row size: {self.max_row_size} '
+                f'Current family size: {fam.size}'
             )
+
+        available_rows_idx = [i for i, r in enumerate(self.rows)
+                              if r.free_spots >= fam.size]
+        row_idx = random.choice(available_rows_idx)
+        self.rows[row_idx].sit(fam)
+
+        # Update max_row_size
+        if row_idx == self.max_row_idx:
+            self.max_row_idx = self.find_max_row_idx()
+            self.max_row_size = self.rows[self.max_row_idx].free_spots
+
+        if debug:
+            print(self)
+
+    def find_max_row_idx(self) -> int:
+        return np.argmax([r.free_spots for r in self.rows])
+
+    def __str__(self):
+        string = ''
+        for row in self.rows:
+            string += str(row) + '\n'
+        return string
 
 
 if __name__ == "__main__":
     hall = Hall('rows.csv')
-    print(hall.max_row_idx)
-    print(hall.max_row_size)
+    fams = [
+        Family('1', 3),
+        Family('1', 5),
+        Family('1', 2),
+        Family('1', 4),
+    ]
+    print(hall)
+    for f in fams:
+        hall.sit(f)
+        print(hall.max_row_idx, hall.max_row_size)

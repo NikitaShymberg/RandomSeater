@@ -22,14 +22,14 @@ class Row():
         self.fams = []
         self.free_spots = max_length
 
-    def sit(self, fam: Family):
+    def sit(self, fam: Family) -> None:
         """
         Asssigns a family into the row. Doesn't yet allocate seats.
         """
         if self.free_spots < fam.size:
             raise RowFullException(f'Error: attempted to sit family {fam.name}'
-                                   ' with {fam.size} people into a row with '
-                                   '{self.free_spots} free spots'
+                                   f' with {fam.size} people into a row with '
+                                   f'{self.free_spots} free spots'
                                    )
 
         self.fams.append(fam)
@@ -40,3 +40,9 @@ class Row():
         Assigns seat numbers to all the families in this row.
         """
         ...  # TODO: write
+
+    def __str__(self):
+        string = f'Row: {self.name}, '
+        string += f'Max: {self.max_length}, '
+        string += f'Remaining: {self.free_spots}'
+        return string
