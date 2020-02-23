@@ -1,6 +1,7 @@
 """
 The main script. Runs the algorithm to produce seating arrangement.
 """
+import argparse
 from Family import Family
 from utils import read_csv
 from Hall import Hall, HallFullException
@@ -17,10 +18,18 @@ def sit_families(families: [Family], hall: Hall) -> bool:
     return True
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--rows_path', required=True)
+    parser.add_argument('--families_path', required=True)
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    families = read_csv('families.csv', Family)
+    args = parse_args()
+    families = read_csv(args.families_path, Family)
     families.sort(key=lambda f: f.size, reverse=True)
-    hall = Hall('rows.csv')
+    hall = Hall(args.rows_path)
     print('Found the following families:')
     print(*families, '\n', sep='\n')
     print(hall)
