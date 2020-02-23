@@ -34,3 +34,9 @@ class Row():
 
         self.fams.append(fam)
         self.free_spots -= fam.size
+
+    def assign_seats(self):
+        """
+        Assigns seat numbers to all the families in this row.
+        """
+        ...  # TODO: write

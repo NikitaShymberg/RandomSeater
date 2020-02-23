@@ -2,6 +2,7 @@
 This file contains the hall class
 """
 import csv
+import numpy as np
 from Family import Family
 from Row import Row
 
@@ -28,6 +29,8 @@ class Hall():
     def __init__(self, layout_csv_path: str):
         self.rows = []
         self._setup_rows(layout_csv_path)
+        self.max_row_idx = np.argmax([r.max_length for r in self.rows])
+        self.max_row_size = self.rows[self.max_row_idx].max_length
 
     def _setup_rows(self, layout_csv_path):
         """
@@ -57,10 +60,17 @@ class Hall():
 
     def sit(self, fam: Family):
         """
+        Sits the given `fam` in a random available row.
         """
-        ...
+        if fam.size > self.max_row_size:
+            raise HallFullException(
+                f'Error: the hall is full! '
+                'Max empty row size: {self.max_row_size} '
+                'Current family size: {fam.size}'
+            )
 
 
 if __name__ == "__main__":
     hall = Hall('rows.csv')
-    print(hall.rows)
+    print(hall.max_row_idx)
+    print(hall.max_row_size)
