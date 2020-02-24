@@ -10,6 +10,7 @@ from Hall import Hall, HallFullException
 SELECT_ROW_CSV_CHOICE = 'Row Layout'
 SELECT_FAM_CSV_CHOICE = 'Families'
 READY_CHOICE = 'Start!'
+NUM_TRIES_BEFORE_WARN = 100
 
 
 def sit_families(families: [Family], hall: Hall) -> bool:
@@ -33,7 +34,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def set_csv_paths(args) -> (str, str):
+def get_csv_paths(args) -> (str, str):
     """
     If args.use_gui is true, shows a gui allowing
     the user to set the paths for the families and rows csv files.
@@ -61,13 +62,11 @@ def set_csv_paths(args) -> (str, str):
                 quit()
             if choice == SELECT_FAM_CSV_CHOICE:
                 families_csv_path = easygui.fileopenbox(
-                    msg='Choose the family information csv file',
                     title='Family csv file',
                     filetypes=['*.csv'],  # FIXME: doesn't work
                 )
             if choice == SELECT_ROW_CSV_CHOICE:
                 rows_csv_path = easygui.fileopenbox(
-                    msg='Choose the seating layout csv file',
                     title='Seating layout csv file',
                     filetypes=['*.csv'],  # FIXME: doesn't work
                 )
@@ -88,10 +87,28 @@ def set_csv_paths(args) -> (str, str):
     return families_csv_path, rows_csv_path
 
 
+def get_output_path(args) -> str:
+    """
+    If args.use_gui is true, shows a gui allowing
+    the user to set the path for the output csv.
+    Otherwise uses args.output_path.
+    Returns the output path to use.
+    """
+    if args.use_gui:
+        easygui.msgbox(
+            msg='Done! Everyone is seated. Please save the output csv file.'
+        )
+        return easygui.filesavebox(
+            title='Choose an output csv file'
+        )
+    else:
+        return args.output_path
+
+
 if __name__ == "__main__":
     # Sort out command line args
     args = parse_args()
-    families_csv_path, rows_csv_path = set_csv_paths(args)
+    families_csv_path, rows_csv_path = get_csv_paths(args)
 
     # Read csv files
     families = read_csv(families_csv_path, Family)
@@ -104,12 +121,25 @@ if __name__ == "__main__":
 
     # Seating loop
     families_are_sitting = False
+    try_num = 0
     while not families_are_sitting:
+        try_num += 1
         try:
             if sit_families(families, hall):
                 families_are_sitting = True
         except HallFullException as e:
             print(e)
             hall.reset()
+            if try_num % NUM_TRIES_BEFORE_WARN == 0 and args.use_gui:
+                to_continue = easygui.boolbox(
+                    msg=f'I wasn\'t able to find a suitable seating '
+                    f'arangement in {try_num} tries. This is either '
+                    'because I need to try some more times, '
+                    'or no possible seating arangements exist.'
+                    '\n\n Would you like to continue trying?'
+                )
+                if not to_continue:
+                    quit()
 
-    hall.to_csv('output.csv')
+    output_path = get_output_path(args)
+    hall.to_csv(output_path)
