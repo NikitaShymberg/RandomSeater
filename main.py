@@ -1,6 +1,7 @@
 """
 The main script. Runs the algorithm to produce seating arrangement.
 """
+import sys
 import argparse
 import easygui
 from Family import Family
@@ -59,7 +60,7 @@ def get_csv_paths(args) -> (str, str):
                          READY_CHOICE]
             )
             if choice is None:
-                quit()
+                sys.exit()
             if choice == SELECT_FAM_CSV_CHOICE:
                 families_csv_path = easygui.fileopenbox(
                     title='Family csv file',
@@ -105,9 +106,7 @@ def get_output_path(args) -> str:
         return args.output_path
 
 
-if __name__ == "__main__":
-    # Sort out command line args
-    args = parse_args()
+def main(args):
     families_csv_path, rows_csv_path = get_csv_paths(args)
 
     # Read csv files
@@ -143,3 +142,9 @@ if __name__ == "__main__":
 
     output_path = get_output_path(args)
     hall.to_csv(output_path)
+
+
+if __name__ == "__main__":
+    # Sort out command line args
+    args = parse_args()
+    main(args)
