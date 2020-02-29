@@ -134,8 +134,8 @@ if __name__ == "__main__":
                 to_continue = easygui.boolbox(
                     msg=f'I wasn\'t able to find a suitable seating '
                     f'arangement in {try_num} tries. This is either '
-                    'because I need to try some more times, '
-                    'or no possible seating arangements exist.'
+                    'because I was unluck and I need to try a couple '
+                    'more times, or no possible seating arangements exist.'
                     '\n\n Would you like to continue trying?'
                 )
                 if not to_continue:
